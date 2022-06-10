@@ -10,6 +10,14 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 from forms import LoginForm, RegisterForm, CreatePostForm, CommentForm
 from flask_gravatar import Gravatar
 
+import requests
+from newsapi import NewsApiClient
+
+
+NEWS_API_KEY = "f4cb769e8cbe41e8bba74cd67451e431"
+news_api = NewsApiClient(api_key=NEWS_API_KEY)
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 ckeditor = CKEditor(app)
@@ -61,6 +69,8 @@ class Comment(db.Model):
     parent_post = relationship("BlogPost", back_populates="comments")
     comment_author = relationship("User", back_populates="comments")
     text = db.Column(db.Text, nullable=False)
+
+
 db.create_all()
 
 
@@ -75,8 +85,13 @@ def admin_only(f):
 
 @app.route('/')
 def get_all_posts():
-    posts = BlogPost.query.all()
-    return render_template("index.html", all_posts=posts, current_user=current_user)
+    posts = None
+    top_headlines = None
+    if current_user.is_authenticated:
+        posts = BlogPost.query.filter_by(author_id=current_user.id)
+        top_headlines = news_api.get_top_headlines(country='us', category='technology')
+        # print(top_headlines)
+    return render_template("index.html", all_posts=posts, headlines=top_headlines, current_user=current_user)
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -219,5 +234,20 @@ def delete_post(post_id):
     return redirect(url_for('get_all_posts'))
 
 
+@app.route("/search")
+def search():
+    pass
+
+
+@app.route("/script")
+def script():
+    pass
+
+
+@app.route("/upload")
+def upload():
+    pass
+
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='127.0.0.1', port=5000)
