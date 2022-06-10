@@ -8,8 +8,8 @@
         <div class="row">
             <div class="col-lg-8 col-md-10 mx-auto">
                 <div class="site-heading">
-                    <h1>Journalist's Toolbox</h1>
-                    <span class="subheading">A collection of useful tools.</span>
+                    <h1>Writing the script</h1>
+                    <span class="subheading">From anywhere.</span>
                 </div>
             </div>
         </div>
@@ -17,48 +17,37 @@
 </header>
 
 <!-- Main Content -->
-{% if current_user.is_authenticated: %}
-<!-- Displaying top news -->
+
+<!-- Displaying script -->
 <div class="container">
     <div class="row">
         <div class="col-lg-8 col-md-10 mx-auto">
-            <h1>
-                Top Headlines!
-            </h1>
-            {% for news in headlines["articles"][:3]: %}
+            {% for post in all_posts %}
             <div class="post-preview">
-                <a href="{{ news['url'] }}">
-                    <img src="{{ news['urlToImage'] }}" class="img-thumbnail">
+                <a href="{{ url_for('show_post', post_id=post.id) }}">
                     <h2 class="post-title">
-                        {{ news['title'] }}
+                        {{post.title}}
                     </h2>
                     <h3 class="post-subtitle">
-                        {{ news['description'] }}
+                        {{post.subtitle}}
                     </h3>
                 </a>
                 <p class="post-meta">Posted by
-                    {{ news['source']['name'] }}
-                    on {{ news['publishedAt'] }}
+                    {{post.author.name}}
+                    on {{post.date}}
+                    <a href="{{url_for('delete_post', post_id=post.id) }}">✘</a>
                 </p>
             </div>
             {% endfor %}
-        </div>
-    </div>
-</div>
-{% else: %}
-<div class="col-lg-8 col-md-10 mx-auto">
-    <div class="overlay"></div>
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 col-md-10 mx-auto">
-                <div class="site-heading">
-                    <h2>Please login.</h2>
-                </div>
+
+
+            <!-- New Post -->
+            <div class="clearfix">
+                <a class="btn btn-primary float-right" href="{{url_for('add_new_post')}}">Create New Post</a>
             </div>
         </div>
     </div>
 </div>
-{% endif %}
 
 <hr>
 

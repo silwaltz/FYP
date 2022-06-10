@@ -74,24 +74,22 @@ class Comment(db.Model):
 db.create_all()
 
 
-def admin_only(f):
+def is_login(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if current_user.id != 1:
+        if not current_user.is_authenticated:
             return abort(403)
         return f(*args, **kwargs)
     return decorated_function
 
 
 @app.route('/')
-def get_all_posts():
-    posts = None
+def home():
     top_headlines = None
     if current_user.is_authenticated:
-        posts = BlogPost.query.filter_by(author_id=current_user.id)
         top_headlines = news_api.get_top_headlines(country='us', category='technology')
         # print(top_headlines)
-    return render_template("index.html", all_posts=posts, headlines=top_headlines, current_user=current_user)
+    return render_template("index.html", headlines=top_headlines, current_user=current_user)
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -118,7 +116,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)
-        return redirect(url_for("get_all_posts"))
+        return redirect(url_for("home"))
 
     return render_template("register.html", form=form, current_user=current_user)
 
@@ -140,14 +138,14 @@ def login():
             return redirect(url_for('login'))
         else:
             login_user(user)
-            return redirect(url_for('get_all_posts'))
+            return redirect(url_for('home'))
     return render_template("login.html", form=form, current_user=current_user)
 
 
 @app.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('get_all_posts'))
+    return redirect(url_for('home'))
 
 
 @app.route("/post/<int:post_id>", methods=["GET", "POST"])
@@ -182,7 +180,7 @@ def contact():
 
 
 @app.route("/new-post", methods=["GET", "POST"])
-@admin_only
+@is_login
 def add_new_post():
     form = CreatePostForm()
     if form.validate_on_submit():
@@ -196,7 +194,7 @@ def add_new_post():
         )
         db.session.add(new_post)
         db.session.commit()
-        return redirect(url_for("get_all_posts"))
+        return redirect(url_for("script"))
 
     return render_template("make-post.html", form=form, current_user=current_user)
 
@@ -204,7 +202,7 @@ def add_new_post():
 
 
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
-@admin_only
+@is_login
 def edit_post(post_id):
     post = BlogPost.query.get(post_id)
     edit_form = CreatePostForm(
@@ -226,27 +224,31 @@ def edit_post(post_id):
 
 
 @app.route("/delete/<int:post_id>")
-@admin_only
+@is_login
 def delete_post(post_id):
     post_to_delete = BlogPost.query.get(post_id)
     db.session.delete(post_to_delete)
     db.session.commit()
-    return redirect(url_for('get_all_posts'))
+    return redirect(url_for('script'))
 
 
 @app.route("/search")
+@is_login
 def search():
-    pass
+    return render_template("search.html")
 
 
 @app.route("/script")
+@is_login
 def script():
-    pass
+    posts = BlogPost.query.filter_by(author_id=current_user.id)
+    return render_template("script.html", all_posts=posts)
 
 
 @app.route("/upload")
+@is_login
 def upload():
-    pass
+    return render_template("upload.html")
 
 
 if __name__ == "__main__":

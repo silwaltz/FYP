@@ -31,7 +31,7 @@
 <!-- Navigation -->
 <nav class="navbar navbar-expand-md navbar-light fixed-top" id="mainNav">
     <div class="container">
-        <a class="navbar-brand" href="{{url_for('get_all_posts')}}">Journalist's Toolbox</a>
+        <a class="navbar-brand" href="{{url_for('home')}}">Journalist's Toolbox</a>
         <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
                 data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
                 aria-label="Toggle navigation">
@@ -41,7 +41,7 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('get_all_posts') }}">Home</a>
+                    <a class="nav-link" href="{{ url_for('home') }}">Home</a>
                 </li>
                 {% if not current_user.is_authenticated: %}
                 <li class="nav-item">
@@ -55,7 +55,7 @@
                     <a class="nav-link" href="{{ url_for('search') }}">Search</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('search') }}">Script</a>
+                    <a class="nav-link" href="{{ url_for('script') }}">Script</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('upload') }}">Upload</a>
