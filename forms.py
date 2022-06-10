@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
-from wtforms.validators import DataRequired, URL
+from wtforms import StringField, SubmitField, PasswordField, FileField
+from wtforms.validators import DataRequired, URL, InputRequired
 from flask_ckeditor import CKEditorField
 
 
@@ -29,3 +29,13 @@ class LoginForm(FlaskForm):
 class CommentForm(FlaskForm):
     comment_text = CKEditorField("Comment", validators=[DataRequired()])
     submit = SubmitField("Submit Comment")
+
+
+class UploadFileForm(FlaskForm):
+    file = FileField("File", validators=[InputRequired()])
+    submit = SubmitField("Upload File")
+
+
+class SearchForm(FlaskForm):
+    keyword = StringField("Keyword", validators=[DataRequired()])
+    submit = SubmitField("Search")

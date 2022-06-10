@@ -1,3 +1,5 @@
+{% import "bootstrap/wtf.html" as wtf %}
+
 {% include "header.html" %}
 
 <!-- Page Header -->
@@ -17,7 +19,49 @@
 </header>
 
 <!-- Main Content -->
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <h2>Use keyword to search for news</h2>
 
+            <form method='POST' enctype='multipart/form-data'>
+                {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+            </form>
+        </div>
+    </div>
+</div>
+
+{% if result: %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+            <h1>
+                Search Result!
+            </h1>
+            {% for news in result["articles"][:5]: %}
+            <div class="post-preview">
+                <a href="{{ news['url'] }}">
+                    <img src="{{ news['urlToImage'] }}" class="img-thumbnail">
+                    <h2 class="post-title">
+                        {{ news['title'] }}
+                    </h2>
+                    <h3 class="post-subtitle">
+                        {{ news['description'] }}
+                    </h3>
+                </a>
+                <p class="post-meta">Posted by
+                    {{ news['source']['name'] }}
+                    on {{ news['publishedAt'] }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+</body>
 
 
 

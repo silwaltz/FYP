@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, abort
+from flask import Flask, render_template, redirect, url_for, flash, abort, request, jsonify
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 from datetime import date
@@ -7,19 +7,25 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin, login_user, LoginManager, login_required, current_user, logout_user
-from forms import LoginForm, RegisterForm, CreatePostForm, CommentForm
+from forms import LoginForm, RegisterForm, CreatePostForm, CommentForm, UploadFileForm, SearchForm
 from flask_gravatar import Gravatar
 
 import requests
 from newsapi import NewsApiClient
 
+import os
+from werkzeug.utils import secure_filename
+import urllib.request
+
 
 NEWS_API_KEY = "f4cb769e8cbe41e8bba74cd67451e431"
 news_api = NewsApiClient(api_key=NEWS_API_KEY)
 
+UPLOAD_FOLDER = 'static/files'
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ckeditor = CKEditor(app)
 Bootstrap(app)
 gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False, force_lower=False, use_ssl=False, base_url=None)
@@ -199,8 +205,6 @@ def add_new_post():
     return render_template("make-post.html", form=form, current_user=current_user)
 
 
-
-
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
 @is_login
 def edit_post(post_id):
@@ -232,10 +236,16 @@ def delete_post(post_id):
     return redirect(url_for('script'))
 
 
-@app.route("/search")
+@app.route("/search", methods=["GET", "POST"])
 @is_login
 def search():
-    return render_template("search.html")
+    form = SearchForm()
+    result = None
+    if form.validate_on_submit():
+        result = news_api.get_everything(q=form.keyword.data)
+        print(result)
+    return render_template("search.html", form=form, result=result)
+
 
 
 @app.route("/script")
@@ -245,10 +255,16 @@ def script():
     return render_template("script.html", all_posts=posts)
 
 
-@app.route("/upload")
+@app.route("/upload", methods=["GET", "POST"])
 @is_login
 def upload():
-    return render_template("upload.html")
+    form = UploadFileForm()
+    if form.validate_on_submit():
+        file = form.file.data  # First grab the file
+        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)), app.config['UPLOAD_FOLDER'],
+                               secure_filename(file.filename)))  # Then save the file
+        return "File has been uploaded."
+    return render_template('upload.html', form=form)
 
 
 if __name__ == "__main__":
