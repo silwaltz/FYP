@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, abort, request, jsonify
+from flask import Flask, render_template, redirect, url_for, flash, abort
 from flask_bootstrap import Bootstrap
 from flask_ckeditor import CKEditor
 from datetime import date
@@ -10,12 +10,10 @@ from flask_login import UserMixin, login_user, LoginManager, login_required, cur
 from forms import LoginForm, RegisterForm, CreatePostForm, CommentForm, UploadFileForm, SearchForm
 from flask_gravatar import Gravatar
 
-import requests
 from newsapi import NewsApiClient
 
 import os
 from werkzeug.utils import secure_filename
-import urllib.request
 
 
 NEWS_API_KEY = "f4cb769e8cbe41e8bba74cd67451e431"
@@ -94,7 +92,6 @@ def home():
     top_headlines = None
     if current_user.is_authenticated:
         top_headlines = news_api.get_top_headlines(country='us', category='technology')
-        # print(top_headlines)
     return render_template("index.html", headlines=top_headlines, current_user=current_user)
 
 
